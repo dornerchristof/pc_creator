@@ -1,0 +1,143 @@
+#Steps before running the script
+#Installing openssh-server
+#Installing pyhton3 and pyhton3-apt
+#Installing sudo
+# su - //changes $PATH to that of root
+#usermod -a -G sudo chrisi
+
+- hosts: all
+  become: true
+  tasks:
+    - name: update apt list
+      apt:
+        update_cache: yes
+    - name: Install NeoVim
+      apt: 
+        name: neovim 
+        state: present
+    - name: Install Core Utils
+      apt: 
+        name: 
+          - man 
+          - git
+          - make
+          - gcc
+          - curl
+        state: present
+    - name: Install X11 
+      apt:
+        name: xorg
+    - name: Install suckless dependencies
+      apt:
+        name:
+          - libxft-dev
+          - libxinerama-dev
+          - libx11-dev
+    - name: Install Compositor and Wallpaper handler
+      apt:
+        name:
+          - picom #compositor
+          - nitrogen #wallpaper
+
+    - name: create directory for programs
+      file:
+        path: ~/programs
+        state: directory   
+      become: false
+
+    - name: Download dwm window manager
+      git:
+        repo: https://github.com/dornerchristof/dwm
+        dest: /home/chrisi/programs/dwm
+      become: false  
+    - name: Install dwm window manager
+      make:
+        chdir: /home/chrisi/programs/dwm
+        target: install
+    - name: Download st terminal emulator
+      git:
+        repo: https://github.com/dornerchristof/st
+        dest: /home/chrisi/programs/st
+      become: false  
+    - name: Install st terminal emulator
+      make:
+        chdir: /home/chrisi/programs/st
+        target: install
+    - name: Download dmenu programs starter etc.
+      git:
+        repo: https://github.com/dornerchristof/dmenu
+        dest: /home/chrisi/programs/dmenu
+      become: false  
+    - name: Install dmenu programs starter etc.
+      make:
+        chdir: /home/chrisi/programs/dmenu
+        target: install
+    
+    - name: Download dotfiles
+      git:
+        repo: https://github.com/dornerchristof/dotfiles
+        dest: /home/chrisi/.config
+      become: false  
+
+    - name: create .tmp folder for .Xauthority
+      file:
+        path: "~/.tmp"
+        state: directory
+      become: false
+
+    - name: Install zsh shell
+      apt:
+        name: zsh
+
+    - name: Set zsh as default shell for root
+      shell:
+        cmd: "chsh -s /bin/zsh"
+    
+    - name: Set zsh as default shell for user
+      user:
+        name: chrisi
+        shell: /bin/zsh
+
+    - name: Syslink zshenv
+      file:
+        src: "/home/chrisi/.config/zsh/zshenv"
+        dest: "/etc/zsh/zshenv"
+        state: link 
+        force: true
+    
+    - name: Remove bash files from $HOME
+      file:
+        path: ~/.bash_history 
+        state: absent
+      become: false  
+    
+    - name: Remove bash files from $HOME
+      file:
+        path: ~/.bash_logout
+        state: absent
+      become: false  
+
+    - name: Remove bash files from $HOME
+      file:
+        path: ~/.bashrc
+        state: absent
+      become: false  
+    
+    - name: Remove .profile form $HOME
+      file:
+        path: ~/.profile
+        state: absent 
+      become: false  
+
+    - name: Install firefox
+      apt:
+        name: firefox-esr
+    - name: Install alsa-utils for alsamixer
+      apt:
+        name: alsa-utils
+
+
+    
+    
+
+    
